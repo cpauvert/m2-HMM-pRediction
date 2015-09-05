@@ -15,6 +15,11 @@ estimMarkovK<-function(fasta, ordre, alphabet ) {
   return(matT)
 }
 
+LogVrais<-function(matTrans,fasta, ordre, alphabet) {
+  # Matrice des transitions observées dans la séquence
+  NAlphaBeta<-matrix(count(fasta, ordre+1), byrow = T, ncol=length(alphabet))
+  return(sum(NAlphaBeta*(log(matTrans))))
+}
 LogVraisCorr<-function(matTrans,fasta, ordre, alphabet) {
   # log vraisemblance corrigée pour éviter log(0) = -Inf
   # si on a pas toutes les transitions 
@@ -24,9 +29,18 @@ LogVraisCorr<-function(matTrans,fasta, ordre, alphabet) {
   return(sum(NAlphaBeta*(log1p(matTrans))))
 }
 
-rapportLogVrais<-function(L0, L1) {
-  # Fonction de convenance
-  return(-2*(L0-L1))
+rapportLogVrais<-function(alphabet, ordre, L0, L1) {
+  # Attention ici on travaille avec le nombre max de paramètres
+  #   estimées, pas de L(L-1) (pour le moment)
+  # 
+  statDeTest<-(-2*(L0-L1))
+  # Nb paramètres Modèle 1 - Nb paramètres Modèle 0
+  L<-(length(alphabet))
+  DDL<-L*(L^(ordre+1)-L^(ordre))
+  
+  # P( X > statDeTest ) ~ pvalue
+  pvalue<-pchisq(statDeTest, df = DDL, lower.tail = F)
+  return(pvalue)
 }
 
 # Fonctions de convenances
