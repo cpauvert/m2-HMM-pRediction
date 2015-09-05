@@ -1,0 +1,44 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}	
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\title{Modélisation}
+\author{\textsc{Charlie Pauvert} \& \textsc{Guillaume Reboul}}
+
+\begin{document}
+
+/bin/bash: :q : commande introuvable
+\section{Notation }
+
+On souhaite modéliser la séquence de l'organisme choisi avec des modèles de chaînes de Markov. 
+L'enchaînement des acides nucléiques dans les séquences est rarement indépendant (pression de sélection).
+
+On va examiner la pertinence de différents ordres de chaînes de Markov. 
+
+
+\subsection{Modéle}
+
+On défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
+Une chaîne de Markov d'ordre $k$ est défini par : 
+
+\begin{itemize}
+\item un alphabet est noté $\mathcal{A} = \{A,C,G,T\}$.
+\item une loi initiale $\mu_0$
+\item une matrice de transition $\pi$ avec $k$ colonnes et $|\mathcal{A}|^k$ lignes.
+\end{itemize}
+
+Selon la propriété de Markov, on a  : 
+
+\[
+\mathbb{P}(X_{i+1} = \beta | X_i = \alpha ) 
+\]
+
+\end{document}
