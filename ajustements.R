@@ -65,7 +65,7 @@ ajustementAIC<-function(mMax, fasta, alphabet, eps=0.1){
     Trace[m+1, 1]<-AIC(L0, K = Nparametre)
     
    if(is.finite(Trace[m+1,1])) {
-     if ( (m == mMax) || min((Trace[m+1,1] < Trace[m,1])){     
+     if ( (m == mMax) || (Trace[m+1,1] < Trace[m,1])){     
       break
      }
    } 
