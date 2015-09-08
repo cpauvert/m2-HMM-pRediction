@@ -27,3 +27,4 @@
 *.synctex.gz
 *.swp
 *.pdf
+.Rproj.user
