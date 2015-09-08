@@ -1,3 +1,6 @@
+# Librairie seqinr
+require(seqinr)
+
 # Chargement des fonctions définis
 source("fonctions.R")
 
@@ -130,11 +133,18 @@ ajustementCritere<-function(critere, mMax, fasta, alphabet, eps=0.1){
   return(Trace)
 }
 
-ajustementCritere("AIC",mMax = 4, fasta = s2c(seqTest),ALPH)
-ajustementCritere("BIC",mMax = 4, fasta = s2c(seqTest),ALPH)
+# Alphabet nucléique standard
+ALPH<-c("a", "c", "g", "t")
+
+# Données
+pfu50<-read.fasta("headN50_Pfu_DSM3638.fasta")[[1]]
+pfu<-read.fasta("complete_genome_Pfu_DSM3638.fasta")[[1]]
 
 
+# Ajustements
 pfuRapport<-ajustementRapportVrais(mMax = 7, fasta = pfu,alphabet = ALPH)
 pfuAIC<-ajustementCritere("AIC",mMax = 7, fasta = pfu,ALPH)
 pfuBIC<-ajustementCritere("BIC",mMax = 7, fasta = pfu,ALPH)
+
+
 
