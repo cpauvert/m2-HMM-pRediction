@@ -1,0 +1,6 @@
+Pyrococcus furiosus DSM 3638
+
+Les données utilisée dans notre projet sont des données issue du génome complet d'une souche d'Archée : Pyrococcus furiosus DSM 3638.
+Nous avons choisi ce génome car, d'une part, essayer un modèle de Markov Caché sur des génomes peu communs comme les Archées afin de modéliser des CDS nous semble interessant et, d'autre part, ce génome est très connu sans l'être. En effet, c'est de cette Archée anaérobie et hyperthermophile qu'est issue la Pfu Polymérase, enzyme utilisée dans les PCR en routine et connue pour comettre moins d'erreurs que ça collègue la Taq polymérase.
+
+Le génome, qui date de 2002, a été téléchargé depuis le site du NCBI en format fasta. Il comporte 1 908 256 nucléotides et son taux de GC est de 40,80%. Selon le site du NCBI, le génome posséde 2088 gène pour 1989 protéines.
