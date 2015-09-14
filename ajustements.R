@@ -147,4 +147,5 @@ pfuAIC<-ajustementCritere("AIC",mMax = 7, fasta = pfu,ALPH)
 pfuBIC<-ajustementCritere("BIC",mMax = 7, fasta = pfu,ALPH)
 
 
-
+#tabAjustement<-data.frame(cbind(rownames(pfuRapport), pfuRapport,pfuAIC,pfuBIC))
+# voir tab.tex
