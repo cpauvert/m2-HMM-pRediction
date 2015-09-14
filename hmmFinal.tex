@@ -1,0 +1,302 @@
+\documentclass{article}
+\usepackage[]{graphicx}
+\usepackage[]{color}
+\usepackage[utf8]{inputenc}	
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage[lf]{venturis}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+Test de l'estimation des chaînes de markov via 
+le package \verb+HMM+.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{require}\hlstd{(HMM)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: HMM}}\begin{alltt}
+\hlkwd{require}\hlstd{(seqinr)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: seqinr\\\#\# Loading required package: ade4}}\begin{alltt}
+\hlcom{# Alphabet nucléique standard}
+\hlstd{ALPH}\hlkwb{<-}\hlkwd{c}\hlstd{(}\hlstr{"a"}\hlstd{,} \hlstr{"c"}\hlstd{,} \hlstr{"g"}\hlstd{,} \hlstr{"t"}\hlstd{)}
+\hlcom{# Données}
+\hlstd{pfu50}\hlkwb{<-}\hlkwd{read.fasta}\hlstd{(}\hlstr{"headN50_Pfu_DSM3638.fasta"}\hlstd{)[[}\hlnum{1}\hlstd{]]}
+\hlstd{pfu}\hlkwb{<-}\hlkwd{read.fasta}\hlstd{(}\hlstr{"complete_genome_Pfu_DSM3638.fasta"}\hlstd{)[[}\hlnum{1}\hlstd{]]}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Estimation de la  loi stationnaire du modèle.
+Probabilité d'être dans l'état C ``codant'' estimé par
+la longueur moyenne des gènes du génome rapporté à la taille totale du génome.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{statio}\hlkwb{<-}\hlkwd{c}\hlstd{(}\hlnum{0.87}\hlstd{,} \hlnum{0.13}\hlstd{)}
+\hlkwd{names}\hlstd{(statio)}\hlkwb{<-}\hlkwd{c}\hlstd{(}\hlstr{'C'}\hlstd{,}\hlstr{'N'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Initialisation d'une chaîne de Markov
+
+ICI : On intégrera les résultats du knitr \texttt{hmm\_small}. Avec  pour valeur de départs de l'algorithme : 
+\begin{itemize}
+\item le vecteur de probabilités de l'état de départ $\hat{\mu}$ précédent.
+\item la matrice de transition de base.
+\end{itemize}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Matrice de transitions aléatoire 1}
+\hlstd{aleatMatriceTransition}\hlkwb{<-}\hlkwa{function}\hlstd{()\{}
+  \hlstd{x}\hlkwb{<-}\hlkwd{sample}\hlstd{(}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlkwc{length.out} \hlstd{=} \hlnum{1000}\hlstd{),} \hlnum{1}\hlstd{)}
+  \hlstd{y}\hlkwb{<-}\hlkwd{sample}\hlstd{(}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlkwc{length.out} \hlstd{=} \hlnum{1000}\hlstd{),} \hlnum{1}\hlstd{)}
+  \hlkwd{return}\hlstd{(}\hlkwd{matrix}\hlstd{(}\hlkwd{c}\hlstd{(x,}\hlnum{1}\hlopt{-}\hlstd{x,}
+                  \hlnum{1}\hlopt{-}\hlstd{y,y),}
+                \hlkwc{byrow}\hlstd{=}\hlnum{TRUE}\hlstd{,}\hlkwc{nrow}\hlstd{=}\hlnum{2}\hlstd{))}
+
+\hlstd{\}}
+
+\hlstd{mat1}\hlkwb{<-}\hlkwd{aleatMatriceTransition}\hlstd{()}
+\hlstd{mat2}\hlkwb{<-}\hlkwd{aleatMatriceTransition}\hlstd{()}
+\hlkwd{print}\hlstd{(mat1)}
+\end{alltt}
+\begin{verbatim}
+##            [,1]      [,2]
+## [1,] 0.07407407 0.9259259
+## [2,] 0.07007007 0.9299299
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hlstd{(mat2)}
+\end{alltt}
+\begin{verbatim}
+##           [,1]      [,2]
+## [1,] 0.2002002 0.7997998
+## [2,] 0.1971972 0.8028028
+\end{verbatim}
+\begin{alltt}
+\hlstd{hmmAleat1}\hlkwb{<-}\hlkwd{initHMM}\hlstd{(}\hlkwc{States} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"C"}\hlstd{,}\hlstr{"N"}\hlstd{),} \hlkwc{Symbols} \hlstd{= ALPH,}\hlkwc{startProbs} \hlstd{= statio,} \hlkwc{transProbs} \hlstd{= mat1)}
+\hlstd{hmmAleat2}\hlkwb{<-}\hlkwd{initHMM}\hlstd{(}\hlkwc{States} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"C"}\hlstd{,}\hlstr{"N"}\hlstd{),} \hlkwc{Symbols} \hlstd{= ALPH,}\hlkwc{startProbs} \hlstd{= statio,} \hlkwc{transProbs} \hlstd{= mat2)}
+\hlstd{estimHMMaleat1}\hlkwb{<-}\hlkwd{baumWelch}\hlstd{(}\hlkwc{hmm} \hlstd{= hmmAleat1,}\hlkwc{observation} \hlstd{= pfu)}
+\hlstd{estimHMMaleat2}\hlkwb{<-}\hlkwd{baumWelch}\hlstd{(}\hlkwc{hmm} \hlstd{= hmmAleat2,}\hlkwc{observation} \hlstd{= pfu)}
+\hlkwd{print}\hlstd{(estimHMMaleat1)}
+\end{alltt}
+\begin{verbatim}
+## $hmm
+## $hmm$States
+## [1] "C" "N"
+## 
+## $hmm$Symbols
+## [1] "a" "c" "g" "t"
+## 
+## $hmm$startProbs
+##    C    N 
+## 0.87 0.13 
+## 
+## $hmm$transProbs
+##     to
+## from          C         N
+##    C 0.07407424 0.9259258
+##    N 0.07007035 0.9299297
+## 
+## $hmm$emissionProbs
+##       symbols
+## states         a         c         g         t
+##      C 0.2965951 0.2035271 0.2039293 0.2959485
+##      N 0.2961310 0.2036664 0.2040509 0.2961517
+## 
+## 
+## $difference
+##   [1] 1.305354e-01 5.000531e-06 5.141017e-06 4.825611e-06 4.260937e-06
+##   [6] 5.666180e-06 4.968689e-06 5.120521e-06 4.802927e-06 4.710303e-06
+##  [11] 5.271190e-06 4.870300e-06 4.379270e-06 6.452980e-06 4.717717e-06
+##  [16] 5.028312e-06 3.994473e-06 5.483593e-06 4.872974e-06 5.238729e-06
+##  [21] 4.429692e-06 5.637977e-06 4.941211e-06 5.221872e-06 4.768802e-06
+##  [26] 4.974328e-06 4.975532e-06 5.491152e-06 4.533287e-06 5.786050e-06
+##  [31] 4.331891e-06 5.127365e-06 4.828283e-06 5.240279e-06 4.797045e-06
+##  [36] 4.846759e-06 5.134900e-06 5.903135e-06 4.854696e-06 4.305556e-06
+##  [41] 5.210469e-06 4.799252e-06 5.181816e-06 5.424472e-06 4.668390e-06
+##  [46] 5.019990e-06 5.125936e-06 4.785652e-06 5.009335e-06 5.331867e-06
+##  [51] 5.773325e-06 4.509748e-06 4.476010e-06 5.580912e-06 5.122046e-06
+##  [56] 5.076585e-06 4.967837e-06 5.320080e-06 4.896679e-06 5.979107e-06
+##  [61] 4.382948e-06 5.750156e-06 4.055329e-06 5.230268e-06 5.569930e-06
+##  [66] 5.244869e-06 4.593493e-06 5.657371e-06 5.230663e-06 5.028748e-06
+##  [71] 5.248010e-06 5.076963e-06 4.721792e-06 5.368976e-06 4.602798e-06
+##  [76] 5.662751e-06 5.059344e-06 5.061002e-06 5.298235e-06 5.043430e-06
+##  [81] 5.313701e-06 4.965812e-06 5.243437e-06 5.041796e-06 5.063835e-06
+##  [86] 6.159747e-06 4.351834e-06 5.438627e-06 5.044137e-06 4.553699e-06
+##  [91] 5.909987e-06 5.188690e-06 5.181716e-06 5.147434e-06 5.801695e-06
+##  [96] 4.584864e-06 5.064596e-06 5.282769e-06 5.385460e-06 5.018904e-06
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hlstd{(estimHMMaleat2)}
+\end{alltt}
+\begin{verbatim}
+## $hmm
+## $hmm$States
+## [1] "C" "N"
+## 
+## $hmm$Symbols
+## [1] "a" "c" "g" "t"
+## 
+## $hmm$startProbs
+##    C    N 
+## 0.87 0.13 
+## 
+## $hmm$transProbs
+##     to
+## from         C         N
+##    C 0.2002014 0.7997986
+##    N 0.1971979 0.8028021
+## 
+## $hmm$emissionProbs
+##       symbols
+## states         a         c         g         t
+##      C 0.2962912 0.2036186 0.2040079 0.2960823
+##      N 0.2961315 0.2036661 0.2040509 0.2961515
+## 
+## 
+## $difference
+##   [1] 1.305343e-01 1.438818e-06 1.701988e-06 1.394667e-06 2.140720e-06
+##   [6] 1.414389e-06 1.329874e-06 1.830311e-06 1.309606e-06 1.993408e-06
+##  [11] 1.322777e-06 1.386889e-06 2.465314e-06 1.669304e-06 1.848706e-06
+##  [16] 1.384311e-06 1.456343e-06 1.487017e-06 1.422499e-06 1.616682e-06
+##  [21] 2.062846e-06 1.930258e-06 1.559624e-06 1.373273e-06 2.332047e-06
+##  [26] 1.423090e-06 2.490154e-06 1.355101e-06 1.941722e-06 1.356641e-06
+##  [31] 1.450270e-06 1.679188e-06 1.564210e-06 1.534694e-06 1.576734e-06
+##  [36] 1.644618e-06 2.153665e-06 1.494248e-06 1.385937e-06 1.567153e-06
+##  [41] 1.554376e-06 1.383953e-06 2.164890e-06 1.438297e-06 2.312572e-06
+##  [46] 1.480651e-06 2.260820e-06 1.374403e-06 1.583827e-06 1.940819e-06
+##  [51] 1.383230e-06 1.356792e-06 1.703897e-06 2.060437e-06 1.377400e-06
+##  [56] 1.447401e-06 1.388636e-06 2.923256e-06 1.386645e-06 2.484954e-06
+##  [61] 1.474290e-06 1.846123e-06 1.641336e-06 1.346221e-06 1.814244e-06
+##  [66] 1.649399e-06 1.372984e-06 2.233180e-06 1.384130e-06 1.699874e-06
+##  [71] 2.212872e-06 1.455369e-06 1.352807e-06 1.608776e-06 2.597179e-06
+##  [76] 1.689703e-06 2.161601e-06 1.764971e-06 1.475687e-06 1.658860e-06
+##  [81] 1.543223e-06 1.532673e-06 1.725321e-06 1.594753e-06 1.601583e-06
+##  [86] 1.466146e-06 1.695307e-06 1.414177e-06 1.882678e-06 1.566969e-06
+##  [91] 1.809367e-06 1.375350e-06 1.789207e-06 1.776299e-06 1.447347e-06
+##  [96] 1.645077e-06 1.450848e-06 1.901693e-06 1.480636e-06 1.385194e-06
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Matrice de transitions défaut et valeurs de départ par défaut}
+\hlstd{hmm2}\hlkwb{<-}\hlkwd{initHMM}\hlstd{(}\hlkwc{States} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"C"}\hlstd{,}\hlstr{"N"}\hlstd{),} \hlkwc{Symbols} \hlstd{= ALPH,}\hlkwc{startProbs} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.5}\hlstd{,}\hlnum{0.5}\hlstd{))}
+\hlstd{estimHMM2}\hlkwb{<-}\hlkwd{baumWelch}\hlstd{(}\hlkwc{hmm} \hlstd{= hmm2,}\hlkwc{observation} \hlstd{= pfu)}
+\hlkwd{print}\hlstd{(estimHMM2)}
+\end{alltt}
+\begin{verbatim}
+## $hmm
+## $hmm$States
+## [1] "C" "N"
+## 
+## $hmm$Symbols
+## [1] "a" "c" "g" "t"
+## 
+## $hmm$startProbs
+##   C   N 
+## 0.5 0.5 
+## 
+## $hmm$transProbs
+##     to
+## from    C    N
+##    C 0.75 0.25
+##    N 0.25 0.75
+## 
+## $hmm$emissionProbs
+##       symbols
+## states         a         c         g         t
+##      C 0.2961636 0.2036567 0.2040423 0.2961374
+##      N 0.2961636 0.2036567 0.2040423 0.2961374
+## 
+## 
+## $difference
+##   [1] 1.305336e-01 3.304777e-07 9.742026e-07 3.082784e-07 2.991078e-07
+##   [6] 1.312387e-06 1.281948e-06 6.657596e-07 5.912811e-07 4.050506e-09
+##  [11] 1.281015e-06 1.080388e-07 7.790062e-08 1.778191e-08 1.257407e-08
+##  [16] 3.301358e-07 3.261399e-07 1.304793e-06 1.286540e-06 9.573316e-07
+##  [21] 6.300483e-09 1.272818e-06 3.362952e-07 1.001548e-07 9.527366e-07
+##  [26] 9.556663e-07 1.714143e-08 6.423228e-08 1.004716e-06 2.899853e-07
+##  [31] 1.340549e-06 1.015719e-06 9.471440e-07 3.628097e-07 3.362952e-07
+##  [36] 1.001548e-07 9.527366e-07 9.556663e-07 1.714143e-08 6.423228e-08
+##  [41] 1.004716e-06 2.899853e-07 1.340549e-06 1.015719e-06 9.471440e-07
+##  [46] 3.628097e-07 3.362952e-07 1.001548e-07 9.527366e-07 9.556663e-07
+##  [51] 1.714143e-08 6.423228e-08 1.004716e-06 2.899853e-07 1.340549e-06
+##  [56] 1.015719e-06 9.471440e-07 3.628097e-07 3.362952e-07 1.001548e-07
+##  [61] 9.527366e-07 9.556663e-07 1.714143e-08 6.423228e-08 1.004716e-06
+##  [66] 2.899853e-07 1.340549e-06 1.015719e-06 9.471440e-07 3.628097e-07
+##  [71] 3.362952e-07 1.001548e-07 9.527366e-07 9.556663e-07 1.714143e-08
+##  [76] 6.423228e-08 1.004716e-06 2.899853e-07 1.340549e-06 1.015719e-06
+##  [81] 9.471440e-07 3.628097e-07 3.362952e-07 1.001548e-07 9.527366e-07
+##  [86] 9.556663e-07 1.714143e-08 6.423228e-08 1.004716e-06 2.899853e-07
+##  [91] 1.340549e-06 1.015719e-06 9.471440e-07 3.628097e-07 3.362952e-07
+##  [96] 1.001548e-07 9.527366e-07 9.556663e-07 1.714143e-08 6.423228e-08
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\end{document}
