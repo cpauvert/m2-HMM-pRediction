@@ -13,3 +13,7 @@ LogVraisHMM(tabEstimStringent2)
 LogVraisHMM(tabEstimSemiAleat)
 LogVraisHMM(tabEstimPenalise)
 LogVraisHMM(tabEstimPenaliseNC)
+<<<<<<< Updated upstream
+=======
+LogVraisHMM(tabEstimfinal)
+>>>>>>> Stashed changes
