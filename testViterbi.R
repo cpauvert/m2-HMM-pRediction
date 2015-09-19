@@ -221,4 +221,5 @@ tabEstimfinal<-viterbi_log(fasta = pfu,
 summary(tabEstimfinal$S)
 longueurSeqfinal<-tailleSeq(vectorViterbi = tabEstimfinal$S, 1)
 hist(longueurSeqfinal, breaks = 1000)
+saveRDS(tabEstimfinal,'tFinal.rds')
 

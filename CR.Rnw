@@ -1,0 +1,278 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}	
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\usepackage[lf]{venturis}
+
+  \title{Modélisation markovienne}
+\author{\textsc{Charlie Pauvert} \& \textsc{Guillaume Reboul}}
+  \date{}
+
+\begin{document}
+
+\maketitle
+
+<<load,echo=FALSE, message=FALSE, warnings=FALSE>>=
+pdf.options(useDingbats = TRUE)
+require(HMM)
+require(seqinr)
+source("fonctions.R")
+@
+
+\section{Introduction}
+\subsection{Origine des données}
+Les données utilisée dans notre projet sont des données issue du génome complet d'une souche d'Archée : Pyrococcus furiosus DSM 3638.
+Nous avons choisi ce génome car, d'une part, essayer un modèle de Markov Caché sur des génomes peu communs comme les Archées afin de modéliser des CDS nous semble interessant et, d'autre part, ce génome est très connu sans l'être. En effet, c'est de cette Archée anaérobie et hyperthermophile qu'est issue la Pfu Polymérase, enzyme utilisée dans les PCR en routine et connue pour comettre moins d'erreurs que son homologue : la Taq polymérase.
+\\ \indent
+Le génome, qui date de 2002, a été téléchargé depuis le site du NCBI en format fasta. Il comporte 1 908 256 nucléotides et son taux de GC est de 40,80\%. Selon le site du NCBI, le génome posséde 2088 gène pour 1989 protéines.
+\subsection{Les interêts du projet}
+L'intêret de ce projet et d'utiliser les modéles de Markov et de Markov caché à des fins bioinformatiques et plus précisement à la prédiction de gènes. En effet, l'alternance de régions codantes et non codantes dans un génome procaryote comme celui de Pyrococcus furiosus peut être modéliser par un modèle de markov caché à 2 états caché.
+
+\section{Modélisation avec une chaîne de Markov}
+\subsection{Présentation de l'objectif}
+Le premier objectif de ce projet est de modéliser notre séquence du génome de Pyrococcus furiosus DSM 3638 à l'aide de modèles de type markovien.
+Pour cela, nous avons utilisé trois types d'approches afin de déterminer l'ordre du modèle de markov qui représente le mieux le génome.
+Ces trois approches sont : le rapport de vraisemblance, le critère AIC et le critère BIC.
+\subsection{Résultats}
+Nous avons donc testé ces 3 critères pour des ordres allant de 0 à 7 afin de définir l'ordre pour lequel le modèle de Markov est le plus explicatif du génome.
+\begin{table}[!h]
+\centering
+\begin{tabular}{r|r|r|r}
+\hline
+Ordre & pvalue & AIC & BIC\\
+\hline
+0 & 0 & -875042.9 & -874993.1\\
+1 & 0 & -901953.7 & -901754.3\\
+2 & 0 & -909306.3 & -908508.8\\
+3 & 0 & -913593.3 & -910403.1\\
+4 & 0 & -916255.0 & -903494.2\\
+5 & 1 & -914946.1 & NA\\
+6 & NA & NA & NA\\
+7 & NA & NA & NA\\
+\hline
+\end{tabular}
+\end{table}
+\paragraph{Le test du rapport de vraisemblance}
+Comme on peut le voir dans le tableau, nous avons réalisé le test du rapport de vraisemblance pour les ordres allant de 0 à 7.
+On peut observer que pour les ordres allant de 0 à 4 compris, les p-values résultantes sont de 0. C'est à dire qu'elles sont inférieures à notre risque de première espèce qui est de 5\%. On rejette donc l'hypothèse $H_0$ qui correspond au fait que le modèle le plus explicatif est le modèle d'ordre <<Ordre>> et non d'ordre <<Ordre+1>>. Ensuite, à l'ordre 5, on observe une p-value de 1 ce qui est nettement supérieur au risque de première espèce utilisés lors de ce test. L'hypothèse $H_1$ est donc rejettée, le modèle d'Ordre 6 n'est pas plus explicatif que le modèle d'ordre 5.
+\\ \indent
+On arrete donc les calculs et on peut conclure que le test de rapport de vraisemblance nous suggére que notre génome est modélisable de la meilleure des façon avec un modèle de Markov d'ordre 5.
+\paragraph{Le critère AIC}
+Les résultats issus de nos calculs des critères AIC sont visibles dans le tableau dans la colone AIC. Les valeurs sont celles obtenues et on peut observer que les valeurs diminues jusqu'à l'AIC d'ordre 4 (-916255.0). On observe pour l'ordre 5 une légère augmentation (-914946.1) par rapport à l'ordre 4 donc l'algorithme c'est arrêter automatiquement. En effet, le but est de trouver l'ordre qui minimise la valeur d'AIC. Afin de ne pas calculer inutilement, nous avons codé la fonction de sorte qu'elle s'arrete quand une hausse est observée pour la valeurs d'AIC de l'orbre k par rapport à la valeur obtenue pour k-1.
+\\ \indent
+La conclusion ici est que le critère AIC nous oriente vers un modèle de Markov d'ordre 4 pour modéliser au mieux notre génome.
+\paragraph{Le critère BIC}
+Le critére BIC est représenté dans le tableau pas la colone BIC. On peut observer une décroissance des valeurs du critère BIC entre les ordres 0 et 3 (de -874993.1 à -910403.1). On note ensuite une légère augmentation au niveau de l'ordre 4 (-903494.2) par rapport a la valeur BIC de l'ordre 3 (-910403.1). Comme pour le critère AIC, car c'est la même fonction, les calculs s'arrêtent lorsque le critère est minimisé.
+\\ \indent
+On peut donc conclure que l'ordre qui minimise le critère BIC est l'ordre 3. Le critère BIC nous oriente donc vers le choix d'un modéle de Markov d'ordre 3 pour modéliser notre jeu de données.
+
+\section{Détection des régions homogènes au long du génome}
+\subsection{Présentation de l'objectif}
+Ici, l'objectif est de trouver l'alternance de région codantes et non codantes grâce aux chaînes de Markov cachées. En effet, en appliquant un certain modèle et en procédant à un apprentissage, on souhaite prédire correctement l'alternance entre les régions codantes et non codantes de \textit{Pyrococcus furiosus}.
+\\ \indent
+Tout d'abord on notera que l'on suppose être dans un modèle de type Markov caché $M_1-M_0$. 
+Une première étape sera d'estimer les paramètres de ce modèle à l'aide de l'algorithme EM. 
+Une seconde étape consiste à implémenter l'algorithme de viterbi afin de determiner la suite des états cachés au long du génome de notre Archée. 
+Enfin on comparera le nombre de prédiciton, la taille moyenne des CDS/gènes et nos autres résultats à des programmes de recherches de CDS librement disponible sur internet.
+
+
+
+\subsection{Modèle}
+
+À l'instar d'une chaîne de Markov classique, on défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
+Une chaîne de Markov caché d'ordre $k$ est définie par :
+
+\begin{itemize}
+\item un alphabet noté $\mathcal{A} = \{A,C,G,T\}$.
+\item une loi initiale $\mu_0$
+\item une matrice de transition $\mathbf{A}$ des états cachés avec $k$ colonnes et $|\mathcal{A}|^k$ lignes.
+\item  une matrice d'émissions  $\mathbf{B}$ des éléments de l'alphabet $\mathcal{A}$ en fonction de l'état caché de la chaîne. Cette matrice contient une ligne par état caché et $|\mathcal{A}|$ colonnes.
+\end{itemize}
+
+\subsection{Résultats}
+
+
+On a tout d'abord testé les librairies \verb+R+ recommandées (HiddenMarkov, RHmm). 
+Cependant, les difficultées d'installation et à l'utilisation de ces librairies nous ont amenés à en tester une autre : \verb+HMM+.
+Ainsi, on a défini notre modèle de Markov caché \emph{via} cette interface.
+Tout d'abord, on a estimé la  loi stationnaire du modèle,  en d'autres termes les probabilités d'être dans l'un des états cachés, ``codant'' noté $C$ et ``non-codant'' noté $N$.
+\[
+	\hat{\mu}_0 = (\hat{p}_C,\hat{p}_N) = (0.87,0.13)
+\]
+Pour cela, on estime la  probabilité d'être dans l'état $C$ ``codant'' par la longueur moyenne des gènes du génome rapportée à la taille totale du génome. 
+Ces estimations ont été effectuées après utilisation de  deux outils (\texttt{GeneMarkS} et \texttt{Glimmer}). Les distributions des tailles de gènes prédits sont retrouvées Figure \ref{fig:dist}.
+\subsubsection{Première estimation}
+Dans un premier temps,  on a  utilisé les valeurs par défaut proposé par la librairie pour les matrices de transitions et d'émissions à savoir :
+
+\[
+	\mathbf{A} = 
+\bordermatrix{~ & C & N \cr
+                  C & 0.75 & 0.25 \cr
+                  N & 0.25 & 0.75 \cr}
+\]
+
+
+\begin{table}[!h]
+	\centering
+	\begin{tabular}{ccccc}
+		& \textbf{a} & \textbf{c} & \textbf{g} & \textbf{t}\\
+		\hline
+		\textbf{C} & 0.25 & 0.25 & 0.25 & 0.25\\
+		\textbf{N} & 0.25 & 0.25 & 0.25 & 0.25\\
+		\hline
+	\end{tabular}
+
+\end{table}
+
+On a ensuite estimé les paramètres du modèle à partir des valeurs de départs précédentes.
+On utilise donc la méthode du maximum de vraisemblance avec l'algorithme EM (avec l'implémentation de Baum et Welch de la librairie \verb+HMM+).
+Les paramètres issus de la première estimation sont situés ci-dessous.
+
+\[
+	\mathbf{A} = 
+\bordermatrix{~ & C & N \cr
+C & 0.781 & 0.219\cr
+N & 0.222 & 0.778\cr}
+\]
+
+\begin{table}[!h]
+	\centering
+	\begin{tabular}{ccccc}
+		& \textbf{a} & \textbf{c} & \textbf{g} & \textbf{t}\\
+	\hline
+	\textbf{C} &0.432 & 0.067 & 0.340 & 0.161\\ 
+	\textbf{N} &0.159 & 0.342 & 0.066 & 0.433\\ 
+	\hline
+\end{tabular}
+\end{table}
+
+L'enchaînement des états cachés vraisemblants est retrouvé par l'algorithme de Viterbi.
+Nous avons utilisé notre implémentation (voir \verb+fonctions.R+), puisque celle fournie par la librairie \verb+HMM+ ne produit pas les vraisemblances.
+On s'est donc intéressé à la distribution de la taille des gènes prédits (cf. Fig\ref{fig:dist}) afin d'évaluer la pertinence de l'estimation (en plus des critères standards vraisemblance).
+On remarque que la distribution de la taille des gènes prédits est très éloignée de celles des deux outils publiés (nombres de gènes, longueur moyenne).
+
+\subsubsection{Deuxième estimation}
+On a donc lancé une deuxième estimation de notre modèle de Markov caché en utilisant une matrice de transitions de départ différentes.
+On a souhaité avantager la transition codant-codant, en passant de 0.75 à 0.87.
+Des séquences codantes plus longues sont attendues.
+Les paramètres issus de la deuxième estimation sont situés ci-dessous.
+
+\[
+	\mathbf{A} = 
+\bordermatrix{~ & C & N \cr
+C & 0.880 & 0.120\cr
+N & 0.268 & 0.732\cr }
+\]
+
+\begin{table}[!h]
+	\centering
+	\begin{tabular}{ccccc}
+		& \textbf{a} & \textbf{c} & \textbf{g} & \textbf{t}\\
+	\hline
+	\textbf{C} &0.217 & 0.285 & 0.118 & 0.380\\
+	\textbf{N} &0.472 & 0.023 & 0.396 & 0.110\\
+	\hline
+\end{tabular}
+\end{table}
+
+La matrice d'émissions estimées est différente de la première estimation.
+Mais les estimations résultantes ne nous ont pas satisfaites.
+Les temps de calcul sont élevés, malgré les avoir effectués sur une ferme de calcul (Genotoul). 
+Les estimations sont trop sensibles aux valeurs de départs, ce qui est un problème typique avec l'algorithme EM.
+
+
+<<data,include=FALSE,echo=FALSE,cache=TRUE>>=
+# Alphabet nucléique standard
+ALPH<-c("a", "c", "g", "t")
+# Données
+pfu50<-read.fasta("headN50_Pfu_DSM3638.fasta")[[1]]
+pfu<-read.fasta("complete_genome_Pfu_DSM3638.fasta")[[1]]
+#' Estimation de la  loi stationnaire du modèle.
+#' Probabilité d'être dans l'état C ``codant'' estimé par
+#' la longueur moyenne des gènes du génome rapporté à la taille totale du génome.
+statio<-c(0.87, 0.13)
+names(statio)<-c('C','N')
+source("testViterbi.R")
+@
+
+<<testRDS, echo=FALSE>>=
+tailleSeq<-function(vectorViterbi,indexSymbole){
+  # Dans notre cas, le 1 correspond à Codant
+  # et le 2 à non codant.
+  #
+  # L'idée de cette fonction de calcul de la taille des états d'intérêt
+  #  est de récupérer le vecteur de l'état complémentaire. non codants.
+  symboleOppose<-ifelse(indexSymbole == 1,2,1)
+  vectorWhich<-which(vectorViterbi == symboleOppose)
+  
+  # On duplique ce vecteur des positions
+  #  que l'on va décaler vers la droite en introduisant 
+  #  un zéro. (et un NA dans le premier pour conserver la longueur =.
+  resultant<-c(vectorWhich,NA) - c(0,vectorWhich)
+  # Les états contigües possèdent un écart résultant de 1
+  #  donc lorsque l'on élimine les valeurs 1,
+  #  on obtient les tailles des séquences des états.
+  resultant<-resultant[ which( resultant != 1) ]
+  return(resultant-1)
+}
+tEstim<-readRDS('tabEstim.rds')
+longueurSeqC<-tailleSeq(vectorViterbi = tEstim$S, 1)
+tFinal<-readRDS('tFinal.rds')
+longueurSeqfinal<-tailleSeq(vectorViterbi = tFinal$S, 1)
+glimmer<-scan("orf_glimmer.output.rtf_modified")
+genemark<-scan("gms.out_modified")
+@
+
+<<hist1,fig.pos='h!', fig.width=7, fig.height=7,fig.align='center',fig.cap="Distributions des tailles de gène prédits par la première estimation avec le modèle de Markov caché $M_1-M_0$.",echo=FALSE, cache=TRUE, warnings=FALSE,fig.label='fig:dist'>>=
+# La distribution des longueurs n'est pas réaliste.
+# Aucun des gènes de dépassent une taille de 100 base, ce qui est improbable.
+par(mfrow=c(2,2))
+hist(glimmer, breaks=100, xlab = "Taille des gènes selon Glimmer",main="Distribution de la taille\n des gènes prédits par Glimmer",ylab="Occurrences")
+hist(genemark, breaks=100, xlab = "Taille des gènes selon GeneMarkS",main="Distribution de la taille\n des gènes prédits par GeneMarkS",ylab="Occurrences")
+hist(longueurSeqC, breaks=100, xlab = "Taille des séquences d'états cachés C",main="Distribution de la taille des gènes \nprédits par la première estimation",ylab="Occurrences")
+hist(longueurSeqfinal, breaks=100, xlab = "Taille des séquences d'états cachés C",main="Distribution de la taille des gènes \nprédits par la deuxième estimation",ylab="Occurrences")
+@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{Notation }
+%
+%On souhaite modéliser la séquence de l'organisme choisi avec des modèles de chaînes de Markov. 
+%L'enchaînement des acides nucléiques dans les séquences est rarement indépendant (pression de sélection).
+%
+%On va examiner la pertinence de différents ordres de chaînes de Markov. 
+%
+%
+%\subsection{Modéle}
+%
+%On défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
+%Une chaîne de Markov d'ordre $k$ est défini par : 
+%
+%\begin{itemize}
+%\item un alphabet est noté $\mathcal{A} = \{A,C,G,T\}$.
+%\item une loi initiale $\mu_0$
+%\item une matrice de transition $\pi$ avec $k$ colonnes et $|\mathcal{A}|^k$ lignes.
+%\end{itemize}
+%
+%Selon la propriété de Markov, on a  : 
+%
+%\[
+%\mathbb{P}(X_{i+1} = \beta | X_i = \alpha ) 
+%\]
+%
+%
+%\subsection{Résultats}
+%
+%\paragraph{Le rapport de vraisemblance}
+%
+%
+%
+%Un modèle de chaîne de markov caché permettrait peut être d'accéder à une meilleure modélisation.
+
+\end{document}
