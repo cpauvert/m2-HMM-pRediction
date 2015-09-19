@@ -21,12 +21,12 @@
 
 \section{Introduction}
 \subsection{Origine des données}
-Les données utilisée dans notre projet sont des données issue du génome complet d'une souche d'Archée : Pyrococcus furiosus DSM 3638.
-Nous avons choisi ce génome car, d'une part, essayer un modèle de Markov Caché sur des génomes peu communs comme les Archées afin de modéliser des CDS nous semble interessant et, d'autre part, ce génome est très connu sans l'être. En effet, c'est de cette Archée anaérobie et hyperthermophile qu'est issue la Pfu Polymérase, enzyme utilisée dans les PCR en routine et connue pour comettre moins d'erreurs que son homologue : la Taq polymérase.
+Les données utilisées dans notre projet sont des données issues du génome complet d'une souche d'Archée : Pyrococcus furiosus DSM 3638.
+Nous avons choisi ce génome car, d'une part, essayer un modèle de Markov caché sur des génomes peu communs comme les Archées afin de modéliser des CDS nous semble interessant et, d'autre part, ce génome est très connu sans l'être. En effet, c'est de cette Archée anaérobie et hyperthermophile qu'est issue la Pfu Polymérase, enzyme utilisée dans les PCR en routine et connue pour comettre moins d'erreurs que son homologue : la Taq polymérase.
 \\ \indent
-Le génome, qui date de 2002, a été téléchargé depuis le site du NCBI en format fasta. Il comporte 1 908 256 nucléotides et son taux de GC est de 40,80\%. Selon le site du NCBI, le génome posséde 2088 gène pour 1989 protéines.
+Le génome, qui date de 2002, a été téléchargé depuis le site du NCBI en format fasta. Il comporte 1 908 256 nucléotides et son taux de GC est de 40,80\%. Selon le site du NCBI, le génome possède 2088 gènes pour 1989 protéines.
 \subsection{Les interêts du projet}
-L'intêret de ce projet et d'utiliser les modéles de Markov et de Markov caché à des fins bioinformatiques et plus précisement à la prédiction de gènes. En effet, l'alternance de régions codantes et non codantes dans un génome procaryote comme celui de Pyrococcus furiosus peut être modéliser par un modèle de markov caché à 2 états caché.
+L'intêret de ce projet et d'utiliser les modéles de Markov et de Markov caché à des fins bioinformatiques et plus précisement à la prédiction de gènes. En effet, l'alternance de régions codantes et non codantes dans un génome procaryote comme celui de Pyrococcus furiosus peut être modélisé par un modèle de markov caché à 2 états caché.
 
 \section{Modélisation avec une chaîne de Markov}
 \subsection{Présentation de l'objectif}
@@ -53,16 +53,28 @@ Ordre & pvalue & AIC & BIC\\
 \end{tabular}
 \end{table}
 \paragraph{Le test du rapport de vraisemblance}
+Avant de discuter les résultats obtenus, définissons un test de rapport de vraisemblance : \\
+Hypothèses :\\
+$H_0$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre>> \\
+$H_1$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre+1>> \\
+Statistique de test sous l'hypothèse $H_0$ : 
+\[
+-2\ln\lambda = -2(\mathcal{L}_0(X)-\mathcal{L}_1(X)) \sim  \mathcal{X}\up{2}(K1-K0)
+\]
+On choisit le risque de première espèce $\alpha$=5\%. Les règles de décisions sont donc :\\
+Si p-value<$\alpha$ : rejet de l'hypothèse $H_0$ \\
+Si p-value>$\alpha$ : pas de rejet de l'hypothèse $H_0$ \\
+
 Comme on peut le voir dans le tableau, nous avons réalisé le test du rapport de vraisemblance pour les ordres allant de 0 à 7.
-On peut observer que pour les ordres allant de 0 à 4 compris, les p-values résultantes sont de 0. C'est à dire qu'elles sont inférieures à notre risque de première espèce qui est de 5\%. On rejette donc l'hypothèse $H_0$ qui correspond au fait que le modèle le plus explicatif est le modèle d'ordre <<Ordre>> et non d'ordre <<Ordre+1>>. Ensuite, à l'ordre 5, on observe une p-value de 1 ce qui est nettement supérieur au risque de première espèce utilisés lors de ce test. L'hypothèse $H_1$ est donc rejettée, le modèle d'Ordre 6 n'est pas plus explicatif que le modèle d'ordre 5.
+On peut observer que pour les ordres allant de 0 à 4 compris, les p-values résultantes sont de 0. C'est à dire qu'elles sont inférieures à notre risque de première espèce qui est de 5\%. On rejette donc l'hypothèse $H_0$ qui correspond au fait que le modèle le plus explicatif est le modèle d'ordre <<Ordre>> et non d'ordre <<Ordre+1>>. Ensuite, à l'ordre 5, on observe une p-value de 1 ce qui est nettement supérieur au risque de première espèce utilisé lors de ce test. L'hypothèse $H_1$ est donc rejettée, le modèle d'Ordre 6 n'est pas plus explicatif que le modèle d'ordre 5.
 \\ \indent
-On arrete donc les calculs et on peut conclure que le test de rapport de vraisemblance nous suggére que notre génome est modélisable de la meilleure des façon avec un modèle de Markov d'ordre 5.
+On arrete donc les calculs et on peut conclure que le test de rapport de vraisemblance nous suggére que notre génome est modélisable de la meilleure des façons avec un modèle de Markov d'ordre 5.
 \paragraph{Le critère AIC}
-Les résultats issus de nos calculs des critères AIC sont visibles dans le tableau dans la colone AIC. Les valeurs sont celles obtenues et on peut observer que les valeurs diminues jusqu'à l'AIC d'ordre 4 (-916255.0). On observe pour l'ordre 5 une légère augmentation (-914946.1) par rapport à l'ordre 4 donc l'algorithme c'est arrêter automatiquement. En effet, le but est de trouver l'ordre qui minimise la valeur d'AIC. Afin de ne pas calculer inutilement, nous avons codé la fonction de sorte qu'elle s'arrete quand une hausse est observée pour la valeurs d'AIC de l'orbre k par rapport à la valeur obtenue pour k-1.
+Les résultats issus de nos calculs des critères AIC sont visibles dans le tableau dans la colone AIC. Les valeurs sont celles obtenues  on peut observer qu'elles diminuent jusqu'à l'AIC d'ordre 4 (-916255.0). On observe pour l'ordre 5 une légère augmentation (-914946.1) par rapport à l'ordre 4 donc l'algorithme c'est arrêté automatiquement. En effet, le but est de trouver l'ordre qui minimise la valeur d'AIC. Afin de ne pas calculer inutilement, nous avons codé la fonction de sorte qu'elle s'arrête quand une hausse est observée pour la valeur d'AIC de l'ordre k par rapport à la valeur obtenue pour k-1.
 \\ \indent
 La conclusion ici est que le critère AIC nous oriente vers un modèle de Markov d'ordre 4 pour modéliser au mieux notre génome.
 \paragraph{Le critère BIC}
-Le critére BIC est représenté dans le tableau pas la colone BIC. On peut observer une décroissance des valeurs du critère BIC entre les ordres 0 et 3 (de -874993.1 à -910403.1). On note ensuite une légère augmentation au niveau de l'ordre 4 (-903494.2) par rapport a la valeur BIC de l'ordre 3 (-910403.1). Comme pour le critère AIC, car c'est la même fonction, les calculs s'arrêtent lorsque le critère est minimisé.
+Le critére BIC est représenté dans le tableau pas la colone BIC. On peut observer une décroissance des valeurs du critère BIC entre les ordres 0 et 3 (de -874993.1 à -910403.1). On note ensuite une légère augmentation au niveau de l'ordre 4 (-903494.2) par rapport à la valeur BIC de l'ordre 3 (-910403.1). Comme pour le critère AIC, car c'est la même fonction, les calculs s'arrêtent lorsque le critère est minimisé.
 \\ \indent
 On peut donc conclure que l'ordre qui minimise le critère BIC est l'ordre 3. Le critère BIC nous oriente donc vers le choix d'un modéle de Markov d'ordre 3 pour modéliser notre jeu de données.
 
@@ -72,15 +84,15 @@ Ici, l'objectif est de trouver l'alternance de région codantes et non codantes 
 \\ \indent
 Tout d'abord on notera que l'on suppose être dans un modèle de type Markov caché $M_1-M_0$. 
 Une première étape sera d'estimer les paramètres de ce modèle à l'aide de l'algorithme EM. 
-Une seconde étape consiste à implémenter l'algorithme de viterbi afin de determiner la suite des états cachés au long du génome de notre Archée. 
-Enfin on comparera le nombre de prédiciton, la taille moyenne des CDS/gènes et nos autres résultats à des programmes de recherches de CDS librement disponible sur internet.
+Une seconde étape consistera à implémenter l'algorithme de viterbi afin de determiner la suite des états cachés au long du génome de notre Archée. 
+Enfin on comparera le nombre de prédicitons, la taille moyenne des CDS/gènes et nos autres résultats à des programmes de recherche de CDS librement disponible sur internet.
 
 
 
 \subsection{Modèle}
 
-À l'instar d'une chaîne de Markov classique, on défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
-Une chaîne de Markov caché d'ordre $k$ est définie par :
+À l'instar d'une chaîne de Markov classique, on définit les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
+Une chaîne de Markov cachée d'ordre $k$ est définie par :
 
 \begin{itemize}
 \item un alphabet noté $\mathcal{A} = \{A,C,G,T\}$.
@@ -93,13 +105,13 @@ Une chaîne de Markov caché d'ordre $k$ est définie par :
 
 
 On a tout d'abord testé les librairies \verb+R+ recommandées (HiddenMarkov, RHmm). 
-Cependant, les difficultées d'installation et à l'utilisation de ces librairies nous ont amenés à en tester une autre : \verb+HMM+.
+Cependant, les difficultées d'installation et d'utilisation de ces librairies nous ont amenées à en tester une autre : \verb+HMM+.
 Ainsi, on a défini notre modèle de Markov caché \emph{via} cette interface.
 Tout d'abord, on a estimé la  loi stationnaire du modèle,  en d'autres termes les probabilités d'être dans l'un des états cachés, ``codant'' noté $C$ et ``non-codant'' noté $N$.
 \[
 	\hat{\mu}_0 = (\hat{p}_C,\hat{p}_N) = (0.87,0.13)
 \]
-Pour cela, on estime la  probabilité d'être dans l'état $C$ ``codant'' par la longueur moyenne des gènes du génome \footnote{On a utilisé l'estimation par \verb+GeneMarkS+.}rapportée à la taille totale du génome.
+Pour cela, on estime la  probabilité d'être dans l'état $C$ ``codant'' par la longueur moyenne des gènes du génome rapportée à la taille totale du génome.
 
 
 Dans un premier temps,  on a  utilisé les valeurs par défaut proposé par la librairie pour les matrices de transitions et d'émissions.
@@ -147,13 +159,13 @@ N & 0.222 & 0.778\cr}
 \end{table}
 
 L'enchaînement des états cachés vraisemblants est retrouvé par l'algorithme de Viterbi.
-Nous avons utilisé notre implémentation (voir \verb+fonctions.R+), puisque celle fournie par la librairie \verb+HMM+ dans laquelle les vraisemblances ne sont pas affichées.
+Nous avons utilisé notre implémentation (voir \verb+fonctions.R+), puisque celle fournie par la librairie \verb+HMM+ ne calcule pas les vraisemblances.
 On s'est donc intéressé à la distribution de la taille des gènes prédits afin d'évaluer la pertinence de l'estimation (en plus des critères standards vraisemblance).
 
 
 Mais les estimations résultantes ne nous ont pas satisfaites.
-Les temps de calcul sont élevés, malgré les avoir effectués sur une ferme de calcul (Genotoul). 
-Les estimations sont trop sensibles aux valeurs de départs, ce qui est un problème typique avec l'algorithme EM.
+Les temps de calcul sont élevés, malgré les avoir effectués sur une ferme de calcul (Genotoul).
+Les estimations sont trop sensibles aux valeurs de départ, ce qui est un problème typique avec l'algorithme EM.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
