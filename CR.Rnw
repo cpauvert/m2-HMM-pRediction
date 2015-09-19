@@ -11,8 +11,12 @@
 \usepackage{amssymb}
 \usepackage{tikz}
 \usetikzlibrary{arrows,automata,positioning,matrix}
+% Pour les tableaux "pros"
+\usepackage{booktabs}
 %\usepackage[lf]{venturis}
 
+\addto\captionsfrench{\def\tablename{\textsc{Tableau}}}
+\usepackage{hyperref}
   \title{Modélisation markovienne}
 \author{\textsc{Charlie Pauvert} \& \textsc{Guillaume Reboul}}
   \date{}
@@ -30,49 +34,53 @@ source("fonctions.R")
 
 \section{Introduction}
 \subsection{Origine des données}
-Les données utilisées dans notre projet sont des données issues du génome complet d'une souche d'Archée : \textit{Pyrococcus furiosus} DSM 3638.
+Les données utilisées dans notre projet\footnote{Le projet se trouve également sur \url{https://github.com/cpauvert/m2-HMM-pRediction}} sont des données issues du génome complet d'une souche d'Archée : \textit{Pyrococcus furiosus} DSM 3638.
 Nous avons choisi ce génome car, d'une part, essayer un modèle de Markov caché sur des génomes peu communs comme les Archées afin de modéliser des CDS nous semble interessant et, d'autre part, ce génome est très connu sans l'être. En effet, c'est de cette Archée anaérobie et hyperthermophile qu'est issue la Pfu Polymérase, enzyme utilisée dans les PCR en routine et connue pour commettre moins d'erreurs que son homologue : la Taq polymérase.
 Le génome, qui date de 2002, a été téléchargé depuis le site du NCBI en format fasta. Il comporte 1 908 256 nucléotides et son taux de GC est de 40,80\%. Selon le site du NCBI, le génome possède 2088 gènes pour 1989 protéines.
 \subsection{Les interêts du projet}
-L'intêret de ce projet et d'utiliser les modéles de Markov et de Markov caché à des fins bioinformatiques et plus précisement à la prédiction de gènes. En effet, l'alternance de régions codantes et non codantes dans un génome procaryote comme celui de Pyrococcus furiosus peut être modélisé par un modèle de markov caché à 2 états caché.
+L'intêret de ce projet et d'utiliser les modéles de Markov et de Markov caché à des fins bioinformatiques et plus précisement à la prédiction de gènes. En effet, l'alternance de régions codantes et non codantes dans un génome procaryote comme celui de \textit{Pyrococcus furiosus} peut être modélisé par un modèle de markov caché à 2 états caché.
 
 \section{Modélisation avec une chaîne de Markov}
 \subsection{Présentation de l'objectif}
-Le premier objectif de ce projet est de modéliser notre séquence du génome de Pyrococcus furiosus DSM 3638 à l'aide de modèles de type markovien.
+Le premier objectif de ce projet est de modéliser notre séquence du génome de \textit{Pyrococcus furiosus} DSM 3638 à l'aide de modèles de type markovien.
 Pour cela, nous avons utilisé trois types d'approches afin de déterminer l'ordre du modèle de markov qui représente le mieux le génome.
 Ces trois approches sont : le rapport de vraisemblance, le critère AIC et le critère BIC.
 \subsection{Résultats}
 Nous avons donc testé ces 3 critères pour des ordres allant de 0 à 7 afin de définir l'ordre pour lequel le modèle de Markov est le plus explicatif du génome.
 \begin{table}[!h]
 \centering
-\begin{tabular}{r|r|r|r}
-\hline
-Ordre & pvalue & AIC & BIC\\
-\hline
+\begin{tabular}{cccc}
+\textbf{Ordre} & \textbf{pvalue} & \textbf{AIC} & \textbf{BIC}\\
+\toprule
 0 & 0 & -875042.9 & -874993.1\\
 1 & 0 & -901953.7 & -901754.3\\
 2 & 0 & -909306.3 & -908508.8\\
-3 & 0 & -913593.3 & -910403.1\\
-4 & 0 & -916255.0 & -903494.2\\
+\textbf{3} & 0 & -913593.3 & \textcolor{red}{-910403.1}\\
+\textbf{4} & \textcolor{red}{0} & \textcolor{red}{-916255.0} & -903494.2\\
 5 & 1 & -914946.1 & NA\\
 6 & NA & NA & NA\\
 7 & NA & NA & NA\\
-\hline
+\bottomrule
 \end{tabular}
+\caption{Tableau récapitulatif des critères d'ajustements d'une chaîne de Markov d'ordre croissant (0 à 7).
+L'ordre final de la chaîne selon chaque critère correspond à l'ordre qui maximise le critère (pour AIC et BIC) et pour lequel on ne rejette plus $H_0$ (en rouge). }
 \end{table}
 \paragraph{Le test du rapport de vraisemblance}
 
-On effectue un test de rapport de vraisemblance comme suit : \\
-Hypothèses :\\
-$H_0$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre>> \\
-$H_1$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre+1>> \\
+On effectue un test de rapport de vraisemblance avec les hypothèses :
+\begin{description}
+\item[$H_0$] : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre>> 
+\item[$H_1$] : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre+1>> 
+\end{description}
 Statistique de test sous l'hypothèse $H_0$ : 
 \[
 -2\ln\lambda = -2(\mathcal{L}_0(X)-\mathcal{L}_1(X)) \underset{H_0}{\sim}  \chi^{2}_{(K_1-K_0)}
 \]
-On choisit le risque de première espèce $\alpha$=5\%. Les règles de décisions sont donc :\\
-Si p-value<$\alpha$ : rejet de l'hypothèse $H_0$ \\
-Si p-value>$\alpha$ : pas de rejet de l'hypothèse $H_0$ \\
+On choisit le risque de première espèce $\alpha$=5\%. Les règles de décisions sont donc :
+\begin{itemize}
+\item Si p-value < $\alpha$ : rejet de l'hypothèse $H_0$ \\
+\item Si p-value > $\alpha$ : pas de rejet de l'hypothèse $H_0$ \\
+\end{itemize}
 
 Comme on peut le voir dans le tableau, nous avons réalisé le test du rapport de vraisemblance pour les ordres allant de 0 à 7.
 On peut observer que pour les ordres allant de 0 à 4 compris, les p-values résultantes sont de 0. C'est à dire qu'elles sont inférieures à notre risque de première espèce qui est de 5\%. On rejette donc l'hypothèse $H_0$ qui correspond au fait que le modèle le plus explicatif est le modèle d'ordre <<Ordre>> et non d'ordre <<Ordre+1>>. Ensuite, à l'ordre 5, on observe une p-value de 1 ce qui est nettement supérieur au risque de première espèce utilisé lors de ce test. L'hypothèse $H_1$ est donc rejettée, le modèle d'Ordre 6 n'est pas plus explicatif que le modèle d'ordre 5.
@@ -155,7 +163,11 @@ Tout d'abord, on a estimé la  loi stationnaire du modèle,  en d'autres termes 
 	\hat{\mu}_0 = (\hat{p}_C,\hat{p}_N) = (0.87,0.13)
 \]
 Pour cela, on estime la  probabilité d'être dans l'état $C$ ``codant'' par la longueur moyenne des gènes du génome rapportée à la taille totale du génome. 
-Ces estimations ont été effectuées après utilisation de  deux outils (\texttt{GeneMarkS} et \texttt{Glimmer}). Les distributions des tailles de gènes prédits sont retrouvées Figure \ref{fig:dist}.
+Ces estimations ont été effectuées après utilisation de  deux outils (\texttt{GeneMarkS} et \texttt{Glimmer}). Les distributions des tailles de gènes prédits sont retrouvées figure \ref{fig:dist}.
+On remarque que la taille médiane des gènes prédits est de 700 bases pour les deux outils.
+Le nombre de gènes prédits est de 2 175.
+
+
 \subsubsection{Première estimation}
 Dans un premier temps,  on a  utilisé les valeurs par défaut proposé par la librairie pour les matrices de transitions et d'émissions à savoir :
 
@@ -207,10 +219,10 @@ On s'est donc intéressé à la distribution de la taille des gènes prédits (c
 On remarque que la distribution de la taille des gènes prédits est très éloignée de celles des deux outils publiés (nombres de gènes, longueur moyenne).
 
 \subsubsection{Deuxième estimation}
-On a donc lancé une deuxième estimation de notre modèle de Markov caché en utilisant une matrice de transitions de départ différentes.
-On a souhaité avantager la transition codant-codant, en passant de 0.75 à 0.87.
+On a donc lancé une deuxième estimation de notre modèle de Markov caché en utilisant une matrice de transitions de départ différente.
+On a souhaité avantager la transition codant-codant ($\pi_{CC}$), en passant de 0.75 à 0.87.
 Des séquences codantes plus longues sont attendues.
-Les paramètres issus de la deuxième estimation sont situés ci-dessous.
+Les paramètres issus de la deuxième estimation sont détaillés ci-dessous.
 
 \[
 	\mathbf{A} = 
@@ -230,10 +242,30 @@ N & 0.268 & 0.732\cr }
 \end{tabular}
 \end{table}
 
-La matrice d'émissions estimées est différente de la première estimation.
-Mais les estimations résultantes ne nous ont pas satisfaites.
-Les temps de calcul sont élevés, malgré les avoir effectués sur une ferme de calcul (Genotoul). 
-Les estimations sont trop sensibles aux valeurs de départs, ce qui est un problème typique avec l'algorithme EM.
+La matrice d'émissions estimée est différente de la première estimation.
+Mais les estimations résultantes ne nous ont pas satisfaites non plus.
+
+\subsubsection{Comparaison}
+
+Le nombre de  gènes prédits est plus faible dans la deuxième estimation  que la première d'un rapport 2.
+En conséquence les gènes prédits ont une taille plus importante que dans l'estimation précédente (voir tableau \ref{tab:res}).
+
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{ccc}
+~ & \textbf{Médiane} & \textbf{Nombre de gènes}\\
+\toprule
+Estimation 1 & 6 & 119626\\
+Estimation 2 &  14 & 62312\\
+\bottomrule
+\end{tabular}
+\caption{Récapitulatif des estimations obtenues.}
+\label{tab:res}
+\end{table}
+
+Les deux estimations présentées ne prédisent pas des gènes de tailles similaires à celles prédites par les deux outils (cf Fig \ref{fig:dist}).
+La distribution des tailles n'est pas réaliste, les gènes les plus grands ne dépassent pas une centaine de nucléotides.
 
 
 <<data,include=FALSE,echo=FALSE,cache=TRUE>>=
@@ -287,40 +319,21 @@ hist(genemark, breaks=100, xlab = "Taille des gènes selon GeneMarkS",main="Dist
 hist(longueurSeqC, breaks=100, xlab = "Taille des séquences d'états cachés C",main="Distribution de la taille des gènes \nprédits par la première estimation",ylab="Occurrences")
 hist(longueurSeqfinal, breaks=100, xlab = "Taille des séquences d'états cachés C",main="Distribution de la taille des gènes \nprédits par la deuxième estimation",ylab="Occurrences")
 @
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\section{Notation }
-%
-%On souhaite modéliser la séquence de l'organisme choisi avec des modèles de chaînes de Markov. 
-%L'enchaînement des acides nucléiques dans les séquences est rarement indépendant (pression de sélection).
-%
-%On va examiner la pertinence de différents ordres de chaînes de Markov. 
-%
-%
-%\subsection{Modéle}
-%
-%On défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
-%Une chaîne de Markov d'ordre $k$ est défini par : 
-%
-%\begin{itemize}
-%\item un alphabet est noté $\mathcal{A} = \{A,C,G,T\}$.
-%\item une loi initiale $\mu_0$
-%\item une matrice de transition $\pi$ avec $k$ colonnes et $|\mathcal{A}|^k$ lignes.
-%\end{itemize}
-%
-%Selon la propriété de Markov, on a  : 
-%
-%\[
-%\mathbb{P}(X_{i+1} = \beta | X_i = \alpha ) 
-%\]
-%
-%
-%\subsection{Résultats}
-%
-%\paragraph{Le rapport de vraisemblance}
-%
-%
-%
-%Un modèle de chaîne de markov caché permettrait peut être d'accéder à une meilleure modélisation.
+\subsection{Discussion}
+
+Ainsi on a travaillé à la modélisation des séquences codantes à l'aide de chaînes de Markov  cachées.
+Malgré le suivi d'un protocole statistique correct, les conclusions biologiques ne sont pas pertinentes.
+Les estimations sont trop sensibles aux valeurs de départ, ce qui est un problème typique avec l'algorithme EM.
+De plus, les temps de calcul sont élevés, malgré les avoir effectués sur une ferme de calcul (Genotoul). 
+
+Parallélement, nous avons testés différentes matrices de transitions et d'émissions, dans lesquelles les paramètres ont été ajustés manuellement.
+Les distributions de la taille des gènes résultant de ces dernières se rapprochaient de celles obtenues avec les outils.
+Cependant, les log-vraisemblances de ces chaînes de Markov cachées étaient moins élevées que celles maximisées par l'EM.
+La balance sur-apprentissage/pertinence biologique.
+Pour conclure, un modèle $M_1-M_0$ n'est sans doute pas assez pertinent pour modéliser les séquences codantes.
+Comme le suggère l'énoncé, on pourrait envisager des modèles markoviens différents ($M_1-M_1$ ou semi-markovien).
+
+
 
 \end{document}
