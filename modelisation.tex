@@ -53,13 +53,13 @@ Ordre & pvalue & AIC & BIC\\
 \end{tabular}
 \end{table}
 \paragraph{Le test du rapport de vraisemblance}
-Avant de discuter les résultats obtenus, définissons un test de rapport de vraisemblance : \\
+On effectue un test de rapport de vraisemblance comme suit : \\
 Hypothèses :\\
 $H_0$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre>> \\
 $H_1$ : la distribution observée provenant de la répartition du modèle d'ordre <<Ordre+1>> \\
 Statistique de test sous l'hypothèse $H_0$ : 
 \[
--2\ln\lambda = -2(\mathcal{L}_0(X)-\mathcal{L}_1(X)) \sim  \mathcal{X}\up{2}(K1-K0)
+-2\ln\lambda = -2(\mathcal{L}_0(X)-\mathcal{L}_1(X)) \underset{H_0}{\sim}  \chi^{2}_{(K_1-K_0)}
 \]
 On choisit le risque de première espèce $\alpha$=5\%. Les règles de décisions sont donc :\\
 Si p-value<$\alpha$ : rejet de l'hypothèse $H_0$ \\
