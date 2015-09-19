@@ -125,3 +125,29 @@ viterbi_log<-function(fasta, matT,matE,alphabet, depart) {
   return(tmp)
   
 }
+tailleSeq<-function(vectorViterbi,indexSymbole){
+  # Dans notre cas, le 1 correspond à Codant
+  # et le 2 à non codant.
+  #
+  # L'idée de cette fonction de calcul de la taille des états d'intérêt
+  #  est de récupérer le vecteur de l'état complémentaire. non codants.
+  symboleOppose<-ifelse(indexSymbole == 1,2,1)
+  vectorWhich<-which(vectorViterbi == symboleOppose)
+  
+  # On duplique ce vecteur des positions
+  #  que l'on va décaler vers la droite en introduisant 
+  #  un zéro. (et un NA dans le premier pour conserver la longueur =.
+  resultant<-c(vectorWhich,NA) - c(0,vectorWhich)
+  # Les états contigües possèdent un écart résultant de 1
+  #  donc lorsque l'on élimine les valeurs 1,
+  #  on obtient les tailles des séquences des états.
+  resultant<-resultant[ which( resultant != 1) ]
+  return(resultant-1)
+}
+LogVraisHMM<-function(estimationHMM){
+  # Calcul de la log-vraisemblance
+  #  en deux parties afin d'éviter les vecteurs trop lourds.
+  tmp<-sum(estimationHMM[which(estimationHMM$S==1),1]) +
+    sum(estimationHMM[which(estimationHMM$S==2),2])
+  return(tmp)
+}

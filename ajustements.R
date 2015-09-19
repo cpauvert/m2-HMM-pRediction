@@ -78,7 +78,6 @@ ajustementRapportVrais<-function(mMax, fasta, alphabet, seuil=0.05){
   return(Trace)
 }
 
-# ajustementRapportVrais(mMax = 4, fasta = s2c(seqTest), ALPH)
 
 ajustementCritere<-function(critere, mMax, fasta, alphabet, eps=0.1){
   # En prenant critère d'ajustement à minimiser (AIC/BIC par ex), 
@@ -146,6 +145,3 @@ pfuRapport<-ajustementRapportVrais(mMax = 7, fasta = pfu,alphabet = ALPH)
 pfuAIC<-ajustementCritere("AIC",mMax = 7, fasta = pfu,ALPH)
 pfuBIC<-ajustementCritere("BIC",mMax = 7, fasta = pfu,ALPH)
 
-
-#tabAjustement<-data.frame(cbind(rownames(pfuRapport), pfuRapport,pfuAIC,pfuBIC))
-# voir tab.tex
