@@ -9,6 +9,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata,positioning,matrix}
 %\usepackage[lf]{venturis}
 
   \title{Modélisation markovienne}
@@ -75,18 +77,52 @@ On peut donc conclure que l'ordre qui minimise le critère BIC est l'ordre 3. Le
 
 \section{Détection des régions homogènes au long du génome}
 \subsection{Présentation de l'objectif}
-Ici, l'objectif est de trouver l'alternance de région codantes et non codantes grâce aux chaînes de Markov cachées. En effet, en appliquant un certain modèle et en procédant à un apprentissage, on souhaite prédire correctement l'alternance entre les régions codantes et non codantes de \textit{Pyrococcus furiosus}.
+L'objectif est de déterminer l'alternance des régions codantes et non codantes grâce aux chaînes de Markov cachées. 
+Le génome d'intérêt est toujours la souche DSM 3638 de \textit{Pyrococcus furiosus}.
 \\ \indent
-Tout d'abord on notera que l'on suppose être dans un modèle de type Markov caché $M_1-M_0$. 
-Une première étape sera d'estimer les paramètres de ce modèle à l'aide de l'algorithme EM. 
-Une seconde étape consiste à implémenter l'algorithme de viterbi afin de determiner la suite des états cachés au long du génome de notre Archée. 
-Enfin on comparera le nombre de prédiciton, la taille moyenne des CDS/gènes et nos autres résultats à des programmes de recherches de CDS librement disponible sur internet.
+Une première étape sera d'estimer les paramètres du modèle avec la méthode du maximum de vraisemblance et l'algorithme EM.
+Une seconde étape consiste à implémenter l'algorithme de Viterbi afin de determiner la suite des états cachés le long du génome de notre Archée. 
+Enfin on comparera le nombre de prédictions et la taille moyenne des CDS/gènes  prédits face aux résultats de deux outils de prédictions de gènes librement disponible sur internet.
 
 
 
 \subsection{Modèle}
 
+\begin{figure}[!h]
+\centering
+\resizebox{0.5\textwidth}{!}{%
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=4cm]
+    \node[state] (A)                {C};
+    \node[state] (B) [right of = A] {N};
+    \path[->] (A) edge [bend left]  node {$\pi_{CN}$} (B)
+    (B) edge [bend left] node {$\pi_{NC}$} (A);
+    \path[->] (A) edge [loop left]  node {$\pi_{CC}$} ();
+    \path[->] (B) edge [loop right]  node {$\pi_{NN}$} ();
+	      \matrix [matrix of nodes,below=2em of A,ampersand replacement=\&](m) {
+		      A \&$p_A$ \\
+		      C \&$p_C$ \\
+		      G \&$p_G$ \\
+		      T \&$p_T$ \\
+	      };
+	      \matrix [matrix of nodes,below=2em of B,ampersand replacement=\&](n) {
+		      A \&$p_A$ \\
+		      C \&$p_C$ \\
+		      G \&$p_G$ \\
+		      T \&$p_T$ \\
+	      };
+	      \path (n) -- node[draw=lightgray] {$M_0$} (m);
+	      \path (A) -- node[anchor=center,draw=lightgray] {$M_1$} (B);
+	      \path[->] (A) edge (m);
+	      \path[->] (B) edge (n);
+\end{tikzpicture}
+}
+\caption{Schéma du modèle de Markov caché $M_1-M_0$ utilisé pour la prédiction de séquences codantes (CDS). Les états cachés sont noté $C$ et $N$ pour codant et non codant, respectivement. Les probabilités de transitions de la chaîne de Markov sont notées $\pi$ et les probabilités d'émissions des nucléotides (modèle $M_0$) en fonction de l'état sont notées $p$.}
+\label{fig:model}
+\end{figure}
 À l'instar d'une chaîne de Markov classique, on défini les $X_1X_2, \dots, X_i, \dots, X_n$ comme les $n$ variables aléatoires décrivant l'enchaînement des lettres dans une séquence.
+On utilise un modèle de Markov caché (schématisé figure \ref{fig:model}) pour inférer les séquences codantes du génome.
+Les compositions en nucléotides sont supposés différentes suivant l'état caché, elles sont modélisées par un modèle $M_0$ sans dépendance entres les nucléotides précédents.
+L'alternance des états cachés est elle supposée dépendante des états précédents, on utilise donc une chaîne de Markov d'ordre 1.
 Une chaîne de Markov caché d'ordre $k$ est définie par :
 
 \begin{itemize}
